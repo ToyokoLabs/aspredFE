@@ -1,0 +1,27 @@
+{% extends 'sequence_analyzer/base.html' %}
+
+{% block content %}
+<div class="text-center">
+    <h1 class="display-4 mb-4">Welcome, {{ user.username }}!</h1>
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Submit Sequence</h5>
+                    <p class="card-text">Submit a new amino acid sequence for analysis.</p>
+                    <a href="{% url 'submit_sequence' %}" class="btn btn-primary">Submit Sequence</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">View Submissions</h5>
+                    <p class="card-text">Check the status and results of your submissions.</p>
+                    <a href="{% url 'view_submissions' %}" class="btn btn-primary">View Submissions</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
