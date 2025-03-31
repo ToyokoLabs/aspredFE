@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'sequence_analyzer.apps.SequenceAnalyzerConfig',
     'crispy_forms',
     'crispy_bootstrap4',
+    'captcha',
 ]
 
 MIDDLEWARE = [
@@ -132,3 +133,14 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 # Login/Logout settings
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGIN_URL = 'login'
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'noreply@labsequenceanalyzer.com'
+
+# reCAPTCHA settings
+RECAPTCHA_PUBLIC_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'  # Test key
+RECAPTCHA_PRIVATE_KEY = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'  # Test key
+
+# Silence reCAPTCHA test key warning
+SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']

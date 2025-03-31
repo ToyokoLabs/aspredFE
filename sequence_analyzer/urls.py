@@ -10,4 +10,5 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('submit/', views.submit_sequence, name='submit_sequence'),
     path('submissions/', views.view_submissions, name='view_submissions'),
+    path('verify-email/<uuid:token>/', views.verify_email, name='verify_email'),
 ]
