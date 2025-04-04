@@ -1,6 +1,6 @@
-# Laboratory Sequence Analyzer
+# ASPred, Antibody Specificity Predictor
 
-A Django application for analyzing amino acid sequences. Users can submit sequences and view analysis results.
+ASPred (Antibody Specificity Predictor) is an innovative computational strategy developed to predict antigen-specific B-cell receptors (BCRs)
 
 ## Features
 
