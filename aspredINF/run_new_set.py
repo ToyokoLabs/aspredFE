@@ -5,6 +5,7 @@ import pandas as pd
 from peft import PeftModel, PeftConfig
 from transformers import EsmTokenizer, EsmForSequenceClassification
 
+
 def predict(model, tokenizer, sequences, threshold=0.5):
     tokens = tokenizer(sequences, padding=True, truncation=True, max_length=512, return_tensors="pt")
     with torch.no_grad():
@@ -13,6 +14,7 @@ def predict(model, tokenizer, sequences, threshold=0.5):
         probs = torch.softmax(logits, dim=1)
         preds = (probs[:, 1] > threshold).int()
     return logits.tolist(), probs[:, 1].tolist(), preds.tolist()
+
 
 def main(model_dir, csv_path, threshold=0.5, output_dir=None):
     print(f"Input file: {csv_path}")
@@ -50,6 +52,7 @@ def main(model_dir, csv_path, threshold=0.5, output_dir=None):
 
     print(f"Predicted label counts: {pd.Series(preds).value_counts().to_dict()}")
     print(f"Saved predictions to: {out_path}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

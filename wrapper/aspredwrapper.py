@@ -1,19 +1,53 @@
+"""
+How to run:
 
+uv run python aspredwrapper.py
+
+or
+
+uv run python aspredwrapper.py --infpath inference_directory --modelpath model_directory
+"""
+
+import argparse
 import mysql.connector
 import csv
 import subprocess
 import os
 import random
+import sys
 from datetime import datetime
 
 from dotenv import load_dotenv
 
 
-#pp python path
-PP = ""
-#mp model path
-MP = ""
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='Path configuration for aspred')
+    parser.add_argument('--infpath', 
+                       type=str,
+                       default='/Users/sb/projects/aspred/aspredFE/aspredINF/',
+                       help='Path to the inference directory')
+    parser.add_argument('--modelpath', 
+                       type=str,
+                       default='/Users/sb/projects/aspred/aspredFE/aspredINF/',                       
+                       help='Path to the model directory')
+    
+    args = parser.parse_args()
+    
+    # Verify if the paths exist
+    if not os.path.exists(args.infpath):
+        raise ValueError(f"Inference path does not exist: {args.infpath}")
+    if not os.path.exists(args.modelpath):
+        raise ValueError(f"Model path does not exist: {args.modelpath}")
+        
+    return args.infpath, args.modelpath
 
+# Use it in your code
+INFPATH, MODELPATH = parse_arguments()
+
+
+curdir = os.getcwd()
+predfile = 'forASPRED.csv'
+predictedfile = predfile.split('.')[0] + '__thresh0.5_predictions.csv' 
 load_dotenv('.env.prod')
 db_config = {
         'user': 'sbassimain',
@@ -41,12 +75,13 @@ def generate_aspred_input(config):
         
         id_lst = [row[0] for row in results]
         
-        with open('forASPRED.csv', 'w', newline='') as csvfile:
+        with open(predfile, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
+            writer.writerow(['sequence','_'])
             for _, sequence in results:
                 writer.writerow([sequence, 0])
         
-        print(f"Created forASPRED.csv with {len(results)} sequences")
+        print(f"Created {predfile} with {len(results)} sequences")
         print(f"ID list contains {len(id_lst)} IDs")
         
         return id_lst
@@ -56,20 +91,25 @@ def generate_aspred_input(config):
     finally:
         if 'conn' in locals():
             conn.close()
+        print("Exiting due to an error")
+        sys.exit(1)
 
 
 def run_prediction():
     print("Running prediction script...")
-    subprocess.run(['python', 'run_prediction.py', 'model1', 'forASPRED.csv'])
+    subprocess.run(['uv', 'run', 'python', os.path.join(INFPATH, 'run_new_set.py'), 
+                    '--model_path', MODELPATH, 
+                    '--input_csv', os.path.join(curdir, predfile)],
+                    cwd=INFPATH)
 
 
 def run_prediction_test():
     """Create mock predictions file"""
     try:
-        with open('forASPRED.csv', 'r', newline='') as infile:
+        with open(predfile, 'r', newline='') as infile:
             reader = csv.reader(infile)
             sequences = list(reader)
-        with open('forASPRED_predictions.csv', 'w', newline='') as outfile:
+        with open(predictedfile, 'w', newline='') as outfile:
             writer = csv.writer(outfile)
             writer.writerow(['sequence', 'label', 'predicted_probs', 'predicted_labels'])
             for sequence, label in sequences:
@@ -87,15 +127,15 @@ def read_output():
     """Read the third column from the predictions CSV file"""
     predictions = []
     try:
-        with open('forASPRED_predictions.csv', 'r', newline='') as csvfile:
+        with open(predictedfile, 'r', newline='') as csvfile:
             reader = csv.reader(csvfile)
             next(reader)
             for row in reader:
                 if len(row) >= 3:
-                    predictions.append(row[2]) 
+                    predictions.append(row[3]) 
         return predictions
     except FileNotFoundError:
-        print("Error: forASPRED_predictions.csv not found")
+        print(f"Error: {predictedfile} not found 105")
         return []
     except Exception as e:
         print(f"Error reading predictions file: {e}")
@@ -132,8 +172,8 @@ def update_database(id_lst, predictions, config):
 if __name__ == "__main__":
     id_lst = generate_aspred_input(db_config)
     print("ID list:", id_lst)
-    #run_prediction()
-    run_prediction_test()
+    run_prediction()
+    #run_prediction_test()
     preds_lst = read_output()
     print(preds_lst)
     update_database(id_lst, preds_lst, db_config)
