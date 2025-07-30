@@ -88,11 +88,12 @@ def generate_aspred_input(config):
         
     except mysql.connector.Error as err:
         print(f"Database error: {err}")
+        print("Exiting due to an error")
+        sys.exit(1)
     finally:
         if 'conn' in locals():
             conn.close()
-        print("Exiting due to an error")
-        sys.exit(1)
+
 
 
 def run_prediction():
