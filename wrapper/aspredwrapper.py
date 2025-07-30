@@ -72,7 +72,9 @@ def generate_aspred_input(config):
         
         cursor.execute(query)
         results = cursor.fetchall()
-        
+        if not results:
+            print("No new sequences to run the inference")
+            sys.exit(1)
         id_lst = [row[0] for row in results]
         
         with open(predfile, 'w', newline='') as csvfile:
